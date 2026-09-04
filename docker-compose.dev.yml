@@ -1,0 +1,110 @@
+services:
+  mongodb:
+    image: mongo:7-jammy
+    container_name: labelly-mongo-dev
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - labelly-network
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server.dev
+    container_name: labelly-api-dev
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb://mongodb:27017/labelly
+      - JWT_SECRET=${JWT_SECRET:-labelly-hackathon-dev-secret-change-me}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - CORS_ORIGIN=*
+      - UPLOAD_DIR=/app/uploads
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    volumes:
+      # Live code mounts
+      - ./server:/app/server
+      - ./packages:/app/packages
+      # Preserve container node_modules
+      - /app/node_modules
+      - /app/server/node_modules
+      - /app/packages/shared/node_modules
+      - /app/packages/rules/node_modules
+      # Persistent file uploads
+      - uploads-data:/app/uploads
+    depends_on:
+      - mongodb
+    networks:
+      - labelly-network
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web.dev
+    container_name: labelly-web-dev
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:5000
+      - REACT_APP_API_URL=http://localhost:5000
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    volumes:
+      # Live code mounts
+      - ./apps/web:/app/apps/web
+      - ./packages:/app/packages
+      # Preserve container node_modules
+      - /app/node_modules
+      - /app/apps/web/node_modules
+      - /app/packages/shared/node_modules
+    depends_on:
+      - server
+    networks:
+      - labelly-network
+
+  mobile:
+    build:
+      context: .
+      dockerfile: Dockerfile.mobile.dev
+    container_name: labelly-mobile-dev
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    ports:
+      - "8081:8081"
+      - "19000:19000"
+      - "19001:19001"
+      - "19002:19002"
+    environment:
+      - EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0
+      - REACT_NATIVE_PACKAGER_HOSTNAME=0.0.0.0
+      - EXPO_PUBLIC_API_URL=${EXPO_PUBLIC_API_URL:-http://10.171.205.117:5000}
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    volumes:
+      # Live code mounts
+      - ./apps/mobile:/app/apps/mobile
+      - ./packages:/app/packages
+      # Preserve container node_modules
+      - /app/node_modules
+      - /app/apps/mobile/node_modules
+      - /app/packages/shared/node_modules
+    depends_on:
+      - server
+    networks:
+      - labelly-network
+
+volumes:
+  mongo-data:
+  uploads-data:
+
+networks:
+  labelly-network:
+    driver: bridge

@@ -1,0 +1,29 @@
+{
+  "name": "@labelly/rules",
+  "version": "1.0.0",
+  "description": "Deterministic Legal Metrology compliance rule engine for Labelly.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@labelly/shared": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}

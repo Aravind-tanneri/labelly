@@ -1,0 +1,28 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install bash and standard utilities for Expo CLI
+RUN apk add --no-cache bash
+
+# Copy root and workspace package manifests
+COPY package*.json ./
+COPY packages/shared/package*.json ./packages/shared/
+COPY apps/mobile/package*.json ./apps/mobile/
+
+RUN npm install
+
+# Copy source files
+COPY packages/ ./packages/
+COPY apps/mobile/ ./apps/mobile/
+
+RUN npm run build --workspace=@labelly/shared
+
+# Expose Metro bundler and Expo dev server ports
+EXPOSE 8081
+EXPOSE 19000
+EXPOSE 19001
+EXPOSE 19002
+
+# Run Expo start with tunnel support for physical device access
+CMD ["npm", "run", "mobile:tunnel"]

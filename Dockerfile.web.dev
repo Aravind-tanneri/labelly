@@ -1,0 +1,20 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy root and workspace package manifests
+COPY package*.json ./
+COPY packages/shared/package*.json ./packages/shared/
+COPY apps/web/package*.json ./apps/web/
+
+RUN npm install
+
+# Copy source files
+COPY packages/ ./packages/
+COPY apps/web/ ./apps/web/
+
+RUN npm run build --workspace=@labelly/shared
+
+EXPOSE 3000
+
+CMD ["npm", "run", "dev", "--workspace=@labelly/web", "--", "--host", "0.0.0.0", "--port", "3000"]

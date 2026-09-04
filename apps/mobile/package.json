@@ -1,0 +1,49 @@
+{
+  "name": "@labelly/mobile",
+  "version": "1.0.0",
+  "description": "Labelly mobile inspector app - scan, verify and enforce Legal Metrology compliance.",
+  "private": true,
+  "main": "src/index.tsx",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@expo/vector-icons": "^15.0.1",
+    "@labelly/shared": "*",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-native-community/netinfo": "12.0.1",
+    "@react-navigation/bottom-tabs": "^7.3.10",
+    "@react-navigation/native": "^7.1.6",
+    "@react-navigation/native-stack": "^7.3.10",
+    "@reduxjs/toolkit": "^2.12.0",
+    "axios": "^1.7.2",
+    "expo": "^57.0.0",
+    "expo-camera": "~57.0.4",
+    "expo-constants": "~57.0.17",
+    "expo-file-system": "~57.0.6",
+    "expo-image-picker": "~57.0.16",
+    "expo-sharing": "~57.0.18",
+    "expo-status-bar": "~57.0.1",
+    "nativewind": "^4.1.23",
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-reanimated": "4.5.1",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "~4.26.0",
+    "react-native-svg": "15.15.4",
+    "react-native-worklets": "0.10.1",
+    "react-redux": "^9.3.0",
+    "tailwindcss": "^3.4.17"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.9",
+    "@expo/ngrok": "^4.1.3",
+    "@types/react": "~19.2.4",
+    "babel-preset-expo": "~57.0.0",
+    "typescript": "~5.9.2"
+  }
+}

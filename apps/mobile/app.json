@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "Labelly",
+    "slug": "labelly",
+    "version": "1.0.0",
+    "scheme": "labelly",
+    "description": "Scan. Verify. Enforce. Legal Metrology compliance inspection platform.",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#020203",
+    "icon": "./src/assets/icon.png",
+    "splash": {
+      "image": "./src/assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#020203"
+    },
+    "extra": {
+      "apiUrl": "http://localhost:5000"
+    },
+    "plugins": [
+      "expo-camera",
+      "expo-image-picker",
+      "expo-sharing",
+      "expo-status-bar"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "gov.in.doca.labelly",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Labelly uses the camera to photograph packaged commodity labels for Legal Metrology compliance checks.",
+        "NSPhotoLibraryUsageDescription": "Labelly accesses your photo library so you can upload package label images for compliance checks."
+      }
+    },
+    "android": {
+      "package": "gov.in.doca.labelly",
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/adaptive-icon.png",
+        "backgroundColor": "#020203"
+      },
+      "permissions": [
+        "CAMERA"
+      ]
+    },
+    "web": {
+      "favicon": "./src/assets/favicon.png"
+    }
+  }
+}

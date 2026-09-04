@@ -1,0 +1,1 @@
+export { formatRules } from "@labelly/rules";

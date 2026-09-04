@@ -1,0 +1,20 @@
+node_modules/
+dist/
+build/
+*.log
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.docker
+.env.*
+
+# Server runtime files
+server/uploads/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

@@ -1,0 +1,54 @@
+services:
+  mongodb:
+    image: mongo:7-jammy
+    container_name: labelly-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - labelly-network
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    container_name: labelly-api
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb://mongodb:27017/labelly
+      - JWT_SECRET=${JWT_SECRET:-labelly_super_secret_jwt_key_2026}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - CORS_ORIGIN=*
+      - UPLOAD_DIR=/app/uploads
+    volumes:
+      - uploads-data:/app/uploads
+    depends_on:
+      - mongodb
+    networks:
+      - labelly-network
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: labelly-web
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+    networks:
+      - labelly-network
+
+volumes:
+  mongo-data:
+  uploads-data:
+
+networks:
+  labelly-network:
+    driver: bridge

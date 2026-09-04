@@ -1,0 +1,1 @@
+export { declarationRules } from "@labelly/rules";

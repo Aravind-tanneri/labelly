@@ -1,0 +1,46 @@
+# Stage 1: Build packages and server
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Copy root and workspace package files
+COPY package*.json ./
+COPY packages/shared/package*.json ./packages/shared/
+COPY packages/rules/package*.json ./packages/rules/
+COPY server/package*.json ./server/
+
+RUN npm install
+
+# Copy source code
+COPY packages/ ./packages/
+COPY server/ ./server/
+
+# Build shared library, rules and server
+RUN npm run build --workspace=@labelly/shared
+RUN npm run build --workspace=@labelly/rules
+RUN npm run build --workspace=@labelly/server
+
+# Stage 2: Production runtime
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+ENV NODE_ENV=production
+
+COPY package*.json ./
+COPY packages/shared/package*.json ./packages/shared/
+COPY packages/rules/package*.json ./packages/rules/
+COPY server/package*.json ./server/
+
+RUN npm install --omit=dev
+
+# Copy compiled artifacts from builder
+COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
+COPY --from=builder /app/packages/rules/dist ./packages/rules/dist
+COPY --from=builder /app/server/dist ./server/dist
+
+# Create uploads directory for PDF reports & images
+RUN mkdir -p /app/uploads
+
+EXPOSE 5000
+
+CMD ["node", "server/dist/index.js"]
