@@ -27,12 +27,11 @@ export const DEFAULT_API_URL = "http://localhost:5000";
 
 export function resolveApiUrl(): string {
   // Vite exposes both VITE_ and REACT_APP_ prefixed variables.
-  // Fall back to the local server so a demo works out of the box.
-  return (
-    import.meta.env.VITE_API_URL ||
-    import.meta.env.REACT_APP_API_URL ||
-    DEFAULT_API_URL
-  );
+  // In production, fallback to "" so Nginx reverse proxy handles /api without CORS or hardcoded hostnames.
+  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
+  if (import.meta.env.REACT_APP_API_URL) return import.meta.env.REACT_APP_API_URL;
+  if (import.meta.env.PROD) return "";
+  return DEFAULT_API_URL;
 }
 
 const browserTokenStore: TokenStore = {
