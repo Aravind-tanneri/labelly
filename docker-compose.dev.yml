@@ -20,7 +20,7 @@ services:
       - "5000:5000"
     environment:
       - PORT=5000
-      - MONGO_URI=mongodb://mongodb:27017/labelly
+      - MONGO_URI=${MONGO_URI:-mongodb://mongodb:27017/labelly}
       - JWT_SECRET=${JWT_SECRET:-labelly-hackathon-dev-secret-change-me}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - CORS_ORIGIN=*
