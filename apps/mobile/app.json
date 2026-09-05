@@ -14,9 +14,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#020203"
     },
-    "extra": {
-      "apiUrl": "http://localhost:5000"
-    },
+    "extra": {},
     "plugins": [
       "expo-camera",
       "expo-image-picker",

@@ -10,37 +10,38 @@ declare const process: {
 };
 
 function resolveDefaultApiUrl(): string {
-  // 1. Prioritize explicit EXPO_PUBLIC_API_URL environment variable
+  // 1. Explicit EXPO_PUBLIC_API_URL has highest priority
   const envApiUrl = process.env.EXPO_PUBLIC_API_URL;
-  if (envApiUrl && envApiUrl.trim().length > 0) {
+  if (envApiUrl && envApiUrl.trim().length > 0 && !envApiUrl.includes("localhost") && !envApiUrl.includes("127.0.0.1")) {
     return envApiUrl.trim();
   }
 
-  const extraApiUrl = (
-    Constants.expoConfig?.extra as { apiUrl?: string } | undefined
-  )?.apiUrl;
-  if (extraApiUrl && extraApiUrl.trim().length > 0) {
-    return extraApiUrl.trim();
-  }
-
-  // 2. In Expo Go LAN mode, auto-discover host LAN IP (ignore exp.direct tunnel domains)
+  // 2. Only use hostUri if it is a literal numeric IPv4 address (e.g. 192.168.x.x, 10.x.x.x)
+  // NEVER use tunnel domains like *.exp.direct or ngrok with port :5000
   const hostUri =
     Constants.expoConfig?.hostUri ||
     (Constants as { manifest?: { debuggerHost?: string } }).manifest?.debuggerHost ||
     (Constants as { manifest2?: { extra?: { expoClient?: { hostUri?: string } } } })
       .manifest2?.extra?.expoClient?.hostUri;
 
-  if (hostUri && !hostUri.includes("exp.direct")) {
-    const ip = hostUri.split(":")[0];
-    if (ip && ip !== "localhost" && ip !== "127.0.0.1") {
-      return `http://${ip}:5000`;
+  if (hostUri) {
+    const rawHost = hostUri.split(":")[0];
+    const isIPv4 = /^(\d{1,3}\.){3}\d{1,3}$/.test(rawHost);
+    if (isIPv4 && rawHost !== "127.0.0.1") {
+      return `http://${rawHost}:5000`;
     }
+  }
+
+  // 3. Fall back to envApiUrl (even if localhost) or default
+  if (envApiUrl && envApiUrl.trim().length > 0) {
+    return envApiUrl.trim();
   }
 
   return "http://localhost:5000";
 }
 
 export const API_BASE_URL = resolveDefaultApiUrl();
+logger.info("API", `EXPO_PUBLIC_API_URL: ${process.env.EXPO_PUBLIC_API_URL || "(not set)"}`);
 logger.info("API", `Resolved Base URL: ${API_BASE_URL}`);
 
 export const apiClient = createApiClient({
