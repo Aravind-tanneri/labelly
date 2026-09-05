@@ -239,12 +239,12 @@ export function LoginScreen() {
           ) : (
             <View>
               <Text className="text-secondaryText text-[10px] font-bold tracking-wider uppercase mb-1">
-                Enter EC2 Host / IP (e.g. 13.233.45.67:5000)
+                Server API URL
               </Text>
               <TextInput
                 value={customServerInput}
                 onChangeText={setCustomServerInput}
-                placeholder="http://<EC2-IP>:5000"
+                placeholder="https://labelly.duckdns.org"
                 placeholderTextColor="#8A8A8A"
                 autoCapitalize="none"
                 autoCorrect={false}

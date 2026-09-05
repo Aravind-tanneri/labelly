@@ -10,6 +10,8 @@ declare const process: {
   };
 };
 
+export const PRODUCTION_API_URL = "https://labelly.duckdns.org";
+
 function resolveDefaultApiUrl(): string {
   // 1. Explicit EXPO_PUBLIC_API_URL has highest priority
   const envApiUrl = process.env.EXPO_PUBLIC_API_URL;
@@ -18,7 +20,6 @@ function resolveDefaultApiUrl(): string {
   }
 
   // 2. Only use hostUri if it is a literal numeric IPv4 address (e.g. 192.168.x.x, 10.x.x.x)
-  // NEVER use tunnel domains like *.exp.direct or ngrok with port :5000
   const hostUri =
     Constants.expoConfig?.hostUri ||
     (Constants as { manifest?: { debuggerHost?: string } }).manifest?.debuggerHost ||
@@ -33,11 +34,13 @@ function resolveDefaultApiUrl(): string {
     }
   }
 
-  // 3. Fall back to envApiUrl (even if localhost) or default
+  // 3. Fall back to envApiUrl if explicitly provided
   if (envApiUrl && envApiUrl.trim().length > 0) {
     return envApiUrl.trim();
   }
-  return "http://localhost:5000";
+
+  // 4. Default to production DuckDNS HTTPS server
+  return PRODUCTION_API_URL;
 }
 
 export const API_BASE_URL = resolveDefaultApiUrl();
