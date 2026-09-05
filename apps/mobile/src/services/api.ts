@@ -113,6 +113,9 @@ export async function testServerConnection(url: string): Promise<{ success: bool
 }
 
 apiClient.interceptors.request.use((config) => {
+  if (apiClient.defaults.baseURL) {
+    config.baseURL = apiClient.defaults.baseURL;
+  }
   (config as any)._startTime = Date.now();
   const isMultipart = config.data instanceof FormData;
   if (isMultipart) {
