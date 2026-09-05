@@ -9,8 +9,9 @@ RUN apk add --no-cache bash
 COPY package*.json ./
 COPY packages/shared/package*.json ./packages/shared/
 COPY apps/mobile/package*.json ./apps/mobile/
+COPY scripts/ ./scripts/
 
-RUN npm install
+RUN npm install --ignore-scripts
 
 # Copy source files
 COPY packages/ ./packages/
