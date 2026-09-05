@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppAuth } from "../context/AuthContext";
+import { getEffectiveApiBaseUrl, setCustomApiBaseUrl } from "../services/api";
 
 export function LoginScreen() {
   const { login, loading, error } = useAppAuth();
@@ -20,6 +21,23 @@ export function LoginScreen() {
   const [localError, setLocalError] = useState<string | null>(null);
 
   const [demoLoading, setDemoLoading] = useState(false);
+  const [serverUrl, setServerUrl] = useState<string>("");
+  const [isEditingServer, setIsEditingServer] = useState(false);
+  const [customServerInput, setCustomServerInput] = useState("");
+
+  useEffect(() => {
+    getEffectiveApiBaseUrl().then((url) => {
+      setServerUrl(url);
+      setCustomServerInput(url);
+    });
+  }, []);
+
+  const handleSaveServer = async () => {
+    if (!customServerInput.trim()) return;
+    const updated = await setCustomApiBaseUrl(customServerInput);
+    setServerUrl(updated);
+    setIsEditingServer(false);
+  };
 
   const shownError = localError ?? error;
   const isBusy = loading || demoLoading;
@@ -158,7 +176,7 @@ export function LoginScreen() {
         <Pressable
           onPress={handleDemoSignIn}
           disabled={isBusy}
-          className={`h-12 rounded-lg border border-primary bg-emerald-950/20 flex-row items-center justify-center mb-6 ${
+          className={`h-12 rounded-lg border border-primary bg-emerald-950/20 flex-row items-center justify-center mb-4 ${
             isBusy ? "opacity-70" : "active:opacity-75"
           }`}
         >
@@ -178,6 +196,58 @@ export function LoginScreen() {
             </>
           )}
         </Pressable>
+
+        {/* Server Target Indicator & In-App Switcher */}
+        <View className="mb-6 bg-surface border border-border rounded-lg p-3">
+          {!isEditingServer ? (
+            <View className="flex-row items-center justify-between">
+              <View className="flex-1 mr-2">
+                <Text className="text-secondaryText text-[10px] font-bold tracking-wider uppercase">
+                  Target Server API
+                </Text>
+                <Text className="text-text text-xs font-mono mt-0.5" numberOfLines={1}>
+                  {serverUrl || "Checking..."}
+                </Text>
+              </View>
+              <Pressable
+                onPress={() => setIsEditingServer(true)}
+                hitSlop={8}
+                className="bg-primary/20 px-2.5 py-1 rounded border border-primary/30 active:opacity-70"
+              >
+                <Text className="text-primary text-xs font-bold">Change</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <View>
+              <Text className="text-secondaryText text-[10px] font-bold tracking-wider uppercase mb-1">
+                Enter EC2 Host / IP (e.g. 13.233.45.67:5000)
+              </Text>
+              <TextInput
+                value={customServerInput}
+                onChangeText={setCustomServerInput}
+                placeholder="http://<EC2-IP>:5000"
+                placeholderTextColor="#8A8A8A"
+                autoCapitalize="none"
+                autoCorrect={false}
+                className="h-10 bg-background border border-border rounded px-3 text-text text-xs mb-2.5 font-mono"
+              />
+              <View className="flex-row gap-2 justify-end">
+                <Pressable
+                  onPress={() => setIsEditingServer(false)}
+                  className="px-3 py-1.5 rounded bg-background border border-border active:opacity-70"
+                >
+                  <Text className="text-secondaryText text-xs font-semibold">Cancel</Text>
+                </Pressable>
+                <Pressable
+                  onPress={handleSaveServer}
+                  className="px-4 py-1.5 rounded bg-primary active:opacity-70"
+                >
+                  <Text className="text-background text-xs font-bold">Save</Text>
+                </Pressable>
+              </View>
+            </View>
+          )}
+        </View>
 
         {/* Department Footer */}
         <Text className="text-center text-secondaryText text-xs tracking-wide">

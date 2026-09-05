@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 import { createApiClient } from "@labelly/shared";
 import { tokenStore } from "./storage";
@@ -36,11 +37,12 @@ function resolveDefaultApiUrl(): string {
   if (envApiUrl && envApiUrl.trim().length > 0) {
     return envApiUrl.trim();
   }
-
   return "http://localhost:5000";
 }
 
 export const API_BASE_URL = resolveDefaultApiUrl();
+export const API_URL_STORAGE_KEY = "labelly.customApiUrl";
+
 logger.info("API", `EXPO_PUBLIC_API_URL: ${process.env.EXPO_PUBLIC_API_URL || "(not set)"}`);
 logger.info("API", `Resolved Base URL: ${API_BASE_URL}`);
 
@@ -48,6 +50,36 @@ export const apiClient = createApiClient({
   store: tokenStore,
   baseURL: API_BASE_URL,
 });
+
+// Hydrate custom API URL if user saved one previously
+AsyncStorage.getItem(API_URL_STORAGE_KEY).then((saved) => {
+  if (saved && saved.trim()) {
+    apiClient.defaults.baseURL = saved.trim();
+    logger.info("API", `Restored custom Base URL: ${saved.trim()}`);
+  }
+}).catch(() => {});
+
+export async function getEffectiveApiBaseUrl(): Promise<string> {
+  try {
+    const saved = await AsyncStorage.getItem(API_URL_STORAGE_KEY);
+    if (saved && saved.trim()) return saved.trim();
+  } catch {}
+  return (apiClient.defaults.baseURL as string) || API_BASE_URL;
+}
+
+export async function setCustomApiBaseUrl(rawUrl: string): Promise<string> {
+  let cleaned = rawUrl.trim();
+  if (!cleaned.startsWith("http://") && !cleaned.startsWith("https://")) {
+    cleaned = `http://${cleaned}`;
+  }
+  if (cleaned.endsWith("/")) {
+    cleaned = cleaned.slice(0, -1);
+  }
+  await AsyncStorage.setItem(API_URL_STORAGE_KEY, cleaned);
+  apiClient.defaults.baseURL = cleaned;
+  logger.info("API", `Updated Base URL: ${cleaned}`);
+  return cleaned;
+}
 
 apiClient.interceptors.request.use((config) => {
   (config as any)._startTime = Date.now();
