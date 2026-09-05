@@ -5,7 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { File, Paths } from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import { getInspection } from "../hooks/useInspection";
-import { apiClient, API_BASE_URL } from "../services/api";
+import { apiClient, resolveMediaUrl } from "../services/api";
 import { ScreenContainer } from "../components/ScreenContainer";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobileCard } from "../components/MobileCard";
@@ -53,13 +53,8 @@ export function ReportScreen({ route, navigation }: Props) {
         `/api/inspections/${inspectionId}/report`
       );
 
-      // 2. Resolve absolute URL and replace any localhost with active phone API_BASE_URL
-      let downloadUrl = data.reportUrl;
-      if (downloadUrl.startsWith("http://localhost:5000") || downloadUrl.startsWith("http://127.0.0.1:5000")) {
-        downloadUrl = downloadUrl.replace(/http:\/\/(localhost|127\.0\.0\.1):5000/, API_BASE_URL.replace(/\/$/, ""));
-      } else if (!downloadUrl.startsWith("http")) {
-        downloadUrl = `${API_BASE_URL.replace(/\/$/, "")}/${downloadUrl.replace(/^\//, "")}`;
-      }
+      // 2. Resolve absolute URL using active API base URL
+      const downloadUrl = resolveMediaUrl(data.reportUrl);
 
       showToast("Downloading verified PDF certificate...", "info");
 

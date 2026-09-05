@@ -3,7 +3,7 @@ import { View, Text, ScrollView, Pressable, ActivityIndicator, Alert, TextInput,
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 import { deleteInspection, getInspection, updateInspectionData } from "../hooks/useInspection";
-import { API_BASE_URL } from "../services/api";
+import { resolveMediaUrl } from "../services/api";
 import { ScreenContainer } from "../components/ScreenContainer";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobileCard } from "../components/MobileCard";
@@ -119,13 +119,7 @@ export function ComplianceResultScreen({ route, navigation }: Props) {
   }
 
   const rawImage = inspection.images[inspection.images.length - 1]?.originalUrl;
-  const evidenceUrl = rawImage
-    ? rawImage.startsWith("http://localhost:5000") || rawImage.startsWith("http://127.0.0.1:5000")
-      ? rawImage.replace(/http:\/\/(localhost|127\.0\.0\.1):5000/, API_BASE_URL.replace(/\/$/, ""))
-      : rawImage.startsWith("http")
-      ? rawImage
-      : `${API_BASE_URL.replace(/\/$/, "")}/${rawImage.replace(/^\//, "")}`
-    : null;
+  const evidenceUrl = rawImage ? resolveMediaUrl(rawImage) : null;
 
   const renderViolation = (v: Violation, index: number) => {
     const isHigh = v.severity === "HIGH";

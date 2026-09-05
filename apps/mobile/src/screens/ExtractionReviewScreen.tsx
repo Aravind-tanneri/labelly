@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { View, Text, TextInput, ScrollView, Pressable, ActivityIndicator, Image, Alert } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { getInspection, updateInspectionData } from "../hooks/useInspection";
-import { API_BASE_URL } from "../services/api";
+import { resolveMediaUrl } from "../services/api";
 
 import { ScreenContainer } from "../components/ScreenContainer";
 import { MobileHeader } from "../components/MobileHeader";
@@ -85,11 +85,7 @@ export function ExtractionReviewScreen({ route, navigation }: Props) {
 
   const resolveImageUrl = (rawUrl?: string): string | null => {
     if (!rawUrl) return null;
-    if (rawUrl.startsWith("http://localhost:5000") || rawUrl.startsWith("http://127.0.0.1:5000")) {
-      return rawUrl.replace(/http:\/\/(localhost|127\.0\.0\.1):5000/, API_BASE_URL.replace(/\/$/, ""));
-    }
-    if (rawUrl.startsWith("http")) return rawUrl;
-    return `${API_BASE_URL.replace(/\/$/, "")}/${rawUrl.replace(/^\//, "")}`;
+    return resolveMediaUrl(rawUrl);
   };
 
   const images = (inspection.images || [])

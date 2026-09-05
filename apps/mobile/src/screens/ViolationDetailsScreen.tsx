@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { View, Text, ScrollView, ActivityIndicator, Image, TextInput, Pressable, Alert } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { getInspection, updateInspectionData } from "../hooks/useInspection";
-import { API_BASE_URL } from "../services/api";
+import { resolveMediaUrl } from "../services/api";
 import { ScreenContainer } from "../components/ScreenContainer";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobileCard } from "../components/MobileCard";
@@ -62,13 +62,7 @@ export function ViolationDetailsScreen({ route, navigation }: Props) {
 
   const violation = inspection.compliance?.violations.find((v) => v.field === field);
   const rawImage = inspection.images[inspection.images.length - 1]?.originalUrl;
-  const lastImage = rawImage
-    ? rawImage.startsWith("http://localhost:5000") || rawImage.startsWith("http://127.0.0.1:5000")
-      ? rawImage.replace(/http:\/\/(localhost|127\.0\.0\.1):5000/, API_BASE_URL.replace(/\/$/, ""))
-      : rawImage.startsWith("http")
-      ? rawImage
-      : `${API_BASE_URL.replace(/\/$/, "")}/${rawImage.replace(/^\//, "")}`
-    : null;
+  const lastImage = rawImage ? resolveMediaUrl(rawImage) : null;
 
   return (
     <ScreenContainer>

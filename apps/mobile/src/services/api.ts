@@ -59,12 +59,26 @@ AsyncStorage.getItem(API_URL_STORAGE_KEY).then((saved) => {
   }
 }).catch(() => {});
 
+export function getActiveApiBaseUrl(): string {
+  return (apiClient.defaults.baseURL as string) || API_BASE_URL;
+}
+
+export function resolveMediaUrl(rawUrl?: string | null): string {
+  if (!rawUrl) return "";
+  const activeBase = getActiveApiBaseUrl().replace(/\/$/, "");
+  if (!rawUrl.startsWith("http")) {
+    return `${activeBase}/${rawUrl.replace(/^\//, "")}`;
+  }
+  // Replace localhost or stale local LAN IPs with active base URL
+  return rawUrl.replace(/^https?:\/\/[^\/]+/, activeBase);
+}
+
 export async function getEffectiveApiBaseUrl(): Promise<string> {
   try {
     const saved = await AsyncStorage.getItem(API_URL_STORAGE_KEY);
     if (saved && saved.trim()) return saved.trim();
   } catch {}
-  return (apiClient.defaults.baseURL as string) || API_BASE_URL;
+  return getActiveApiBaseUrl();
 }
 
 import axios from "axios";
