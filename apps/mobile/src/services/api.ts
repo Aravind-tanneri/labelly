@@ -10,27 +10,32 @@ declare const process: {
 };
 
 function resolveDefaultApiUrl(): string {
-  // In Expo Go, auto-discover host laptop IP from Metro hostUri so phone connects over LAN dynamically
+  // 1. Prioritize explicit EXPO_PUBLIC_API_URL environment variable
+  const envApiUrl = process.env.EXPO_PUBLIC_API_URL;
+  if (envApiUrl && envApiUrl.trim().length > 0) {
+    return envApiUrl.trim();
+  }
+
+  const extraApiUrl = (
+    Constants.expoConfig?.extra as { apiUrl?: string } | undefined
+  )?.apiUrl;
+  if (extraApiUrl && extraApiUrl.trim().length > 0) {
+    return extraApiUrl.trim();
+  }
+
+  // 2. In Expo Go LAN mode, auto-discover host LAN IP (ignore exp.direct tunnel domains)
   const hostUri =
     Constants.expoConfig?.hostUri ||
     (Constants as { manifest?: { debuggerHost?: string } }).manifest?.debuggerHost ||
     (Constants as { manifest2?: { extra?: { expoClient?: { hostUri?: string } } } })
       .manifest2?.extra?.expoClient?.hostUri;
 
-  if (hostUri) {
+  if (hostUri && !hostUri.includes("exp.direct")) {
     const ip = hostUri.split(":")[0];
     if (ip && ip !== "localhost" && ip !== "127.0.0.1") {
       return `http://${ip}:5000`;
     }
   }
-
-  const envApiUrl = process.env.EXPO_PUBLIC_API_URL;
-  const extraApiUrl = (
-    Constants.expoConfig?.extra as { apiUrl?: string } | undefined
-  )?.apiUrl;
-
-  if (envApiUrl) return envApiUrl;
-  if (extraApiUrl) return extraApiUrl;
 
   return "http://localhost:5000";
 }
