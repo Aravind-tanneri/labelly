@@ -14,7 +14,11 @@
       "resizeMode": "contain",
       "backgroundColor": "#020203"
     },
-    "extra": {},
+    "extra": {
+      "eas": {
+        "projectId": "2dc145b1-85a2-47c7-bec6-84c9c19674fd"
+      }
+    },
     "plugins": [
       "expo-camera",
       "expo-image-picker",
@@ -31,12 +35,15 @@
     },
     "android": {
       "package": "gov.in.doca.labelly",
+      "usesCleartextTraffic": true,
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/adaptive-icon.png",
         "backgroundColor": "#020203"
       },
       "permissions": [
-        "CAMERA"
+        "android.permission.CAMERA",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {

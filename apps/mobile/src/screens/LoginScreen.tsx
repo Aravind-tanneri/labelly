@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import {
   ActivityIndicator,
   Image,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   Text,
@@ -11,7 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppAuth } from "../context/AuthContext";
-import { getEffectiveApiBaseUrl, setCustomApiBaseUrl } from "../services/api";
+import { getEffectiveApiBaseUrl, setCustomApiBaseUrl, testServerConnection } from "../services/api";
 
 export function LoginScreen() {
   const { login, loading, error } = useAppAuth();
@@ -24,6 +26,8 @@ export function LoginScreen() {
   const [serverUrl, setServerUrl] = useState<string>("");
   const [isEditingServer, setIsEditingServer] = useState(false);
   const [customServerInput, setCustomServerInput] = useState("");
+  const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [testingConnection, setTestingConnection] = useState(false);
 
   useEffect(() => {
     getEffectiveApiBaseUrl().then((url) => {
@@ -37,6 +41,16 @@ export function LoginScreen() {
     const updated = await setCustomApiBaseUrl(customServerInput);
     setServerUrl(updated);
     setIsEditingServer(false);
+    setTestResult(null);
+  };
+
+  const handleTestConnection = async () => {
+    if (!customServerInput.trim()) return;
+    setTestingConnection(true);
+    setTestResult(null);
+    const res = await testServerConnection(customServerInput);
+    setTestResult(res);
+    setTestingConnection(false);
   };
 
   const shownError = localError ?? error;
@@ -69,7 +83,12 @@ export function LoginScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <ScrollView
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        className="flex-1"
+        keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 0}
+      >
+        <ScrollView
         className="flex-1"
         contentContainerStyle={{
           paddingHorizontal: 24,
@@ -231,9 +250,31 @@ export function LoginScreen() {
                 autoCorrect={false}
                 className="h-10 bg-background border border-border rounded px-3 text-text text-xs mb-2.5 font-mono"
               />
+              {testResult && (
+                <Text
+                  className={`text-[11px] mb-2 font-medium ${
+                    testResult.success ? "text-emerald-400" : "text-rose-400"
+                  }`}
+                >
+                  {testResult.success ? "✓ " : "✕ "}
+                  {testResult.message}
+                </Text>
+              )}
               <View className="flex-row gap-2 justify-end">
                 <Pressable
-                  onPress={() => setIsEditingServer(false)}
+                  onPress={handleTestConnection}
+                  disabled={testingConnection}
+                  className="px-3 py-1.5 rounded bg-emerald-950/40 border border-primary/50 active:opacity-70"
+                >
+                  <Text className="text-primary text-xs font-semibold">
+                    {testingConnection ? "Testing..." : "Test Connection"}
+                  </Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => {
+                    setIsEditingServer(false);
+                    setTestResult(null);
+                  }}
                   className="px-3 py-1.5 rounded bg-background border border-border active:opacity-70"
                 >
                   <Text className="text-secondaryText text-xs font-semibold">Cancel</Text>
@@ -254,6 +295,7 @@ export function LoginScreen() {
           Department of Consumer Affairs • Government of India
         </Text>
       </ScrollView>
-    </SafeAreaView>
+    </KeyboardAvoidingView>
+  </SafeAreaView>
   );
 }

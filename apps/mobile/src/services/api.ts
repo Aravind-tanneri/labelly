@@ -67,8 +67,14 @@ export async function getEffectiveApiBaseUrl(): Promise<string> {
   return (apiClient.defaults.baseURL as string) || API_BASE_URL;
 }
 
+import axios from "axios";
+
 export async function setCustomApiBaseUrl(rawUrl: string): Promise<string> {
   let cleaned = rawUrl.trim();
+  // If user entered raw IP with https, downgrade to http since IP lacks SSL cert
+  if (cleaned.startsWith("https://") && /^https:\/\/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.test(cleaned)) {
+    cleaned = cleaned.replace("https://", "http://");
+  }
   if (!cleaned.startsWith("http://") && !cleaned.startsWith("https://")) {
     cleaned = `http://${cleaned}`;
   }
@@ -77,8 +83,33 @@ export async function setCustomApiBaseUrl(rawUrl: string): Promise<string> {
   }
   await AsyncStorage.setItem(API_URL_STORAGE_KEY, cleaned);
   apiClient.defaults.baseURL = cleaned;
-  logger.info("API", `Updated Base URL: ${cleaned}`);
+  logger.info("API", `Updated Base URL to: ${cleaned}`);
   return cleaned;
+}
+
+export async function testServerConnection(url: string): Promise<{ success: boolean; message: string }> {
+  let target = url.trim();
+  if (target.startsWith("https://") && /^https:\/\/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.test(target)) {
+    target = target.replace("https://", "http://");
+  }
+  if (!target.startsWith("http://") && !target.startsWith("https://")) {
+    target = `http://${target}`;
+  }
+  if (target.endsWith("/")) {
+    target = target.slice(0, -1);
+  }
+  try {
+    const res = await axios.get(`${target}/health`, { timeout: 6000 });
+    if (res.status === 200 && res.data?.status === "ok") {
+      return { success: true, message: "Connected! Server is online and ready." };
+    }
+    return { success: true, message: `Server responded with HTTP ${res.status}` };
+  } catch (err: any) {
+    return {
+      success: false,
+      message: err.message || "Failed to reach server. Check IP and ensure http:// (not https://) is used.",
+    };
+  }
 }
 
 apiClient.interceptors.request.use((config) => {
