@@ -15,7 +15,10 @@ server {
 server {
     listen 443 ssl;
     server_name labelly.duckdns.org;
-    client_max_body_size 20M;
+    client_max_body_size 25M;
+    client_body_buffer_size 1M;
+    client_body_timeout 180s;
+    client_header_timeout 180s;
 
     ssl_certificate /etc/letsencrypt/live/labelly.duckdns.org/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/labelly.duckdns.org/privkey.pem;
@@ -39,6 +42,10 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto https;
         proxy_cache_bypass $http_upgrade;
+
+        proxy_connect_timeout 180s;
+        proxy_send_timeout 180s;
+        proxy_read_timeout 180s;
     }
 }
 EOF
@@ -47,7 +54,10 @@ else
     cat << 'EOF' > /etc/nginx/conf.d/default.conf
 server {
     listen 80;
-    client_max_body_size 20M;
+    client_max_body_size 25M;
+    client_body_buffer_size 1M;
+    client_body_timeout 180s;
+    client_header_timeout 180s;
 
     location / {
         root /usr/share/nginx/html;
@@ -64,6 +74,10 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_cache_bypass $http_upgrade;
+
+        proxy_connect_timeout 180s;
+        proxy_send_timeout 180s;
+        proxy_read_timeout 180s;
     }
 }
 EOF

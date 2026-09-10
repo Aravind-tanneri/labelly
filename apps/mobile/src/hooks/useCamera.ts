@@ -16,7 +16,7 @@ export function useCamera() {
 
   const capture = async (): Promise<string | null> => {
     if (!cameraRef.current) return null;
-    const photo = await cameraRef.current.takePictureAsync({ quality: 0.8 });
+    const photo = await cameraRef.current.takePictureAsync({ quality: 0.7 });
     try {
       await cameraRef.current.resumePreview();
     } catch {

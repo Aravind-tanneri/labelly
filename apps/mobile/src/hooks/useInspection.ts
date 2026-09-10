@@ -64,7 +64,7 @@ export async function uploadInspectionImages(
       type,
     } as unknown as Blob);
   });
-  await apiClient.post(API_ENDPOINTS.uploadImage(id), form, { timeout: 60000 });
+  await apiClient.post(API_ENDPOINTS.uploadImage(id), form, { timeout: 120000 });
 }
 
 export async function analyzeInspection(
